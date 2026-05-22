@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>APE AR Test</title>
+  <title>APE AR Business Case</title>
 
   <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.7/aframe/build/aframe-ar.min.js"></script>
@@ -10,33 +10,102 @@
 
 <body style="margin: 0; overflow: hidden;">
 
-<a-scene
-  embedded
-  arjs="sourceType: webcam; debugUIEnabled: false;">
+<a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
 
   <a-marker preset="hiro">
-
-    <a-box
-      position="0 0.5 0"
-      width="1"
-      height="1"
-      depth="1"
-      color="red">
-    </a-box>
-
-    <a-text
-      value="APE AR Test"
-      position="-1 1.4 0"
-      rotation="-90 0 0"
-      color="black"
-      width="4">
-    </a-text>
-
+    <a-entity id="chart" scale="0.08 0.08 0.08" position="0 0 0"></a-entity>
   </a-marker>
 
   <a-entity camera></a-entity>
 
 </a-scene>
+
+<script>
+const data = [
+  {monat:"08/26", umsatz:200, cf:-19800},
+  {monat:"09/26", umsatz:2300, cf:-7700},
+  {monat:"10/26", umsatz:2400, cf:-5800},
+  {monat:"11/26", umsatz:2500, cf:-5500},
+  {monat:"12/26", umsatz:2600, cf:-5400},
+  {monat:"01/27", umsatz:2700, cf:-5300},
+  {monat:"02/27", umsatz:2800, cf:-5200},
+  {monat:"03/27", umsatz:5000, cf:-3000},
+  {monat:"04/27", umsatz:6000, cf:-2000},
+  {monat:"05/27", umsatz:7000, cf:-1000},
+  {monat:"06/27", umsatz:8000, cf:0},
+  {monat:"07/27", umsatz:9000, cf:1000},
+  {monat:"08/27", umsatz:10000, cf:2000},
+  {monat:"09/27", umsatz:14000, cf:6000},
+  {monat:"10/27", umsatz:14000, cf:6000},
+  {monat:"11/27", umsatz:14000, cf:5750},
+  {monat:"12/27", umsatz:14000, cf:5750},
+  {monat:"01/28", umsatz:20000, cf:11750},
+  {monat:"02/28", umsatz:20000, cf:11750},
+  {monat:"03/28", umsatz:20000, cf:11750},
+  {monat:"04/28", umsatz:20000, cf:11750},
+  {monat:"05/28", umsatz:15000, cf:6750},
+  {monat:"06/28", umsatz:15000, cf:6750},
+  {monat:"07/28", umsatz:15000, cf:6750}
+];
+
+const chart = document.querySelector("#chart");
+
+const spacing = 0.55;
+const startX = -6.5;
+
+let cfKum = 0;
+
+function addBox(x, z, value, scale, color) {
+  const height = Math.max(Math.abs(value) / scale, 0.05);
+  const y = value >= 0 ? height / 2 : -height / 2;
+
+  const box = document.createElement("a-box");
+  box.setAttribute("position", `${x} ${y} ${z}`);
+  box.setAttribute("width", "0.35");
+  box.setAttribute("height", height);
+  box.setAttribute("depth", "0.35");
+  box.setAttribute("color", color);
+  chart.appendChild(box);
+}
+
+function addText(value, x, y, z, width = 2) {
+  const text = document.createElement("a-text");
+  text.setAttribute("value", value);
+  text.setAttribute("position", `${x} ${y} ${z}`);
+  text.setAttribute("rotation", "-90 0 0");
+  text.setAttribute("color", "black");
+  text.setAttribute("width", width);
+  chart.appendChild(text);
+}
+
+data.forEach((d, i) => {
+  const x = startX + i * spacing;
+  cfKum += d.cf;
+
+  addBox(x, -4, d.umsatz, 5000, "#4CAF50");
+  addBox(x, -3.2, d.cf, 5000, d.cf >= 0 ? "#2196F3" : "#F44336");
+  addBox(x, -2.4, cfKum, 20000, cfKum >= 0 ? "#9C27B0" : "#FF9800");
+
+  if (i % 4 === 0) {
+    addText(d.monat, x - 0.15, 0.05, -1.5, 1.5);
+  }
+
+  if (cfKum >= 0 && cfKum - d.cf < 0) {
+    addText("Break-even", x - 0.5, 2.4, -2.2, 3);
+
+    const marker = document.createElement("a-sphere");
+    marker.setAttribute("position", `${x} 2 -2.4`);
+    marker.setAttribute("radius", "0.25");
+    marker.setAttribute("color", "#FFD700");
+    chart.appendChild(marker);
+  }
+});
+
+addText("APE BC", -7.2, 3.2, -4, 4);
+addText("Umsatz", -7.2, 0.1, -4, 3);
+addText("CF", -7.2, 0.1, -3.2, 3);
+addText("CF kum", -7.2, 0.1, -2.4, 3);
+</script>
 
 </body>
 </html>
